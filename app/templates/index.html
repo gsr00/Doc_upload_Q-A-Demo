@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hatton James Legal · Drafting Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #262262;
+      --rust: #c05530;
+      --sand: #f6f7fb;
+      --card: #ffffff;
+      --shadow: 0 18px 38px rgba(13, 29, 73, 0.14);
+      --radius: 16px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+      background: radial-gradient(140% 140% at 20% 10%, rgba(38,34,98,0.1), transparent 45%), var(--sand);
+      color: #0f152c;
+    }
+    header {
+      background: linear-gradient(120deg, var(--ink), #1d1a50 50%, #111033 100%);
+      color: #eef1ff;
+      padding: 28px 28px 36px;
+      box-shadow: var(--shadow);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18));
+    }
+    .brand .name {
+      font-family: 'Libre Baskerville', serif;
+      letter-spacing: 0.03em;
+      font-size: 1.3rem;
+    }
+    .subhead {
+      margin: 8px 0 0;
+      opacity: 0.9;
+    }
+    main {
+      max-width: 1120px;
+      margin: -32px auto 64px;
+      padding: 0 20px;
+    }
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 2fr 1.1fr;
+    }
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(38,34,98,0.05);
+    }
+    .card h2 {
+      font-family: 'Libre Baskerville', serif;
+      margin: 0 0 12px;
+      color: var(--ink);
+      font-size: 1.4rem;
+      letter-spacing: 0.01em;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      font-size: 0.72rem;
+      color: var(--rust);
+      margin-bottom: 6px;
+      display: inline-block;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin: 14px 0 6px;
+    }
+    input[type="text"],
+    input[type="file"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(12, 22, 58, 0.18);
+      background: #fbfbfd;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+    .goals {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      margin: 8px 0 4px;
+    }
+    .goal {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid rgba(38,34,98,0.15);
+      border-radius: 12px;
+      background: #f9f7ff;
+    }
+    .goal input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--ink);
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      align-items: center;
+    }
+    button,
+    .ghost {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 120ms ease, box-shadow 160ms ease;
+    }
+    button.primary {
+      background: linear-gradient(135deg, var(--rust), #d87045);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(192, 85, 48, 0.35);
+    }
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 34px rgba(192, 85, 48, 0.4);
+    }
+    .ghost {
+      background: #f1f2f8;
+      color: #1b1f3f;
+      border: 1px dashed rgba(27,31,63,0.25);
+    }
+    .placeholder {
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px dashed rgba(38,34,98,0.18);
+      border-radius: 12px;
+      background: #f9fafc;
+      color: #50546b;
+      font-size: 0.95rem;
+    }
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .result-card {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(38,34,98,0.08);
+      background: linear-gradient(135deg, #fbfbff, #f1f3ff);
+      color: #1c2142;
+      box-shadow: 0 6px 16px rgba(17, 25, 61, 0.08);
+    }
+    .error {
+      color: #b00020;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="https://www.hattonjameslegal.co.uk/wp-content/uploads/2020/01/logo.png" alt="Hatton James Legal logo">
+      <div>
+        <div class="name">Hatton James Legal</div>
+        <div class="subhead">Drafting workspace – experimental</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <div class="eyebrow">Section A · Rewrite document</div>
+        <h2>Turn this document into a stronger draft</h2>
+
+        <label for="doc-upload">Upload DOCX</label>
+        <input id="doc-upload" type="file" accept=".doc,.docx">
+
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" placeholder="List must-keep clauses, deadlines, parties, or anything to emphasise."></textarea>
+
+        <div class="actions">
+          <button class="primary" type="button" id="rewrite-btn">Run rewrite</button>
+          <button class="ghost" type="button" disabled aria-disabled="true">Download file (coming soon)</button>
+        </div>
+        <div id="rewrite-result" class="result-card" hidden></div>
+        <div id="rewrite-error" class="error" hidden></div>
+      </section>
+
+      <section class="card">
+        <div class="eyebrow">Section B · General Q&A</div>
+        <h2>Ask a legal drafting question</h2>
+        <label for="question">Question</label>
+        <textarea id="question" placeholder="e.g., What’s a safe limitation of liability clause for SaaS?"></textarea>
+        <div class="actions">
+          <button class="primary" type="button" id="qa-btn">Submit question</button>
+        </div>
+        <div id="qa-result" class="result-card" hidden></div>
+        <div id="qa-error" class="error" hidden></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const qaBtn = document.getElementById('qa-btn');
+    const qaResult = document.getElementById('qa-result');
+    const qaError = document.getElementById('qa-error');
+    const rewriteBtn = document.getElementById('rewrite-btn');
+    const rewriteResult = document.getElementById('rewrite-result');
+    const rewriteError = document.getElementById('rewrite-error');
+
+    qaBtn.addEventListener('click', async () => {
+      qaError.hidden = true;
+      qaResult.hidden = true;
+
+      const question = document.getElementById('question').value.trim();
+      if (!question) {
+        qaError.textContent = 'Please enter a question.';
+        qaError.hidden = false;
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/qa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Request failed');
+        }
+        qaResult.textContent = data.answer;
+        qaResult.hidden = false;
+      } catch (err) {
+        qaError.textContent = err.message || 'Something went wrong.';
+        qaError.hidden = false;
+      }
+    });
+
+    rewriteBtn.addEventListener('click', async () => {
+      rewriteError.hidden = true;
+      rewriteResult.hidden = true;
+
+      const fileInput = document.getElementById('doc-upload');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        rewriteError.textContent = 'Please choose a DOCX file.';
+        rewriteError.hidden = false;
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('notes', document.getElementById('notes').value || '');
+
+      try {
+        const res = await fetch('/api/rewrite', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Request failed');
+        }
+        rewriteResult.textContent = data.message;
+        rewriteResult.hidden = false;
+      } catch (err) {
+        rewriteError.textContent = err.message || 'Something went wrong.';
+        rewriteError.hidden = false;
+      }
+    });
+  </script>
+</body>
+</html>
+
