@@ -1,8 +1,10 @@
 ﻿from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+
+from app import qa_service
 
 app = FastAPI(title="legal-rewrite-qa")
 
@@ -25,14 +27,12 @@ class QARequest(BaseModel):
 
 @app.post("/api/qa")
 async def ask_question(payload: QARequest):
+    # Validate and forward to the QA service (LLM stubbed in llm_gateway for now).
     if not payload.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    placeholder_answer = (
-        "Thanks for your question. This is a placeholder response while the drafting "
-        "assistant is being connected. We will return specific guidance here soon."
-    )
-    return {"answer": placeholder_answer}
+    answer = qa_service.answer_question(payload.question.strip())
+    return {"answer": answer}
 
 
 @app.post("/api/rewrite")
@@ -46,4 +46,3 @@ async def rewrite_document(file: UploadFile = File(...), notes: str | None = Non
         f"{notes.strip() if notes else 'none'}."
     )
     return {"message": placeholder}
-
