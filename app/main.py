@@ -4,7 +4,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from app.services import qa_service
+from app.services import document_parser, file_store, qa_service
 
 app = FastAPI(title="legal-rewrite-qa")
 
@@ -37,12 +37,19 @@ async def ask_question(payload: QARequest):
 
 @app.post("/api/rewrite")
 async def rewrite_document(file: UploadFile = File(...), notes: str | None = None):
-    if not file.filename.lower().endswith((".docx", ".doc")):
-        raise HTTPException(status_code=400, detail="Please upload a .docx or .doc file.")
-
-    placeholder = (
-        f"Received '{file.filename}'. A rewritten DOCX will be available here once the "
-        "rewrite service is connected. Notes received: "
-        f"{notes.strip() if notes else 'none'}."
-    )
-    return {"message": placeholder}
+    # Accept only DOCX, with size/type validation and temp cleanup.
+    tmp_path: Path | None = None
+    try:
+        tmp_path = file_store.save_upload_to_temp(file)
+        extracted_text = document_parser.extract_text_from_docx(tmp_path)
+        # Do not log or return raw text; just confirm processing succeeded.
+        message = (
+            "Document processed successfully. Rewrite service will use this text when connected. "
+            f"Characters extracted: {len(extracted_text)}."
+        )
+        return {"message": message}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    finally:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)

@@ -6,6 +6,7 @@ from app import prompts
 from app.services.llm_gateway import generate_text
 
 
+
 def answer_question(question: str) -> str:
     """Generate an answer for a general drafting question using the persona prompt."""
     user_prompt = (
