@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from app import prompts
-from app.llm_gateway import generate_text
+from app.services.llm_gateway import generate_text
 
 
 def answer_question(question: str) -> str:

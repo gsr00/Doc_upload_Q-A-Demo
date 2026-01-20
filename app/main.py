@@ -4,7 +4,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from app import qa_service
+from app.services import qa_service
 
 app = FastAPI(title="legal-rewrite-qa")
 
@@ -12,7 +12,7 @@ app = FastAPI(title="legal-rewrite-qa")
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve the static UI page."""
-    ui_path = Path(__file__).parent / "templates" / "index.html"
+    ui_path = Path(__file__).parent / "web" / "templates" / "index.html"
     return HTMLResponse(ui_path.read_text(encoding="utf-8"))
 
 
