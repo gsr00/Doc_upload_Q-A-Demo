@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse
@@ -51,5 +51,6 @@ async def rewrite_document(file: UploadFile = File(...), notes: str | None = Non
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     finally:
+        # Always delete temp file, regardless of success or failure.
         if tmp_path and tmp_path.exists():
             tmp_path.unlink(missing_ok=True)

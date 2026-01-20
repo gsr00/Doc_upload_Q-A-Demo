@@ -40,7 +40,7 @@ def extract_text_from_docx(path: Path) -> str:
         if text:
             parts.append(text)
 
-    # Capture text inside tables as well
+    # Capture text inside tables as well so users don’t miss embedded content.
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:

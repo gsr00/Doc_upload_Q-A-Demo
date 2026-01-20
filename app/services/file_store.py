@@ -51,6 +51,7 @@ def save_upload_to_temp(upload: UploadFile, max_bytes: int = DEFAULT_MAX_BYTES) 
     temp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
     total = 0
     try:
+        # Stream the upload in 1 MB chunks to avoid large memory spikes.
         while True:
             chunk = upload.file.read(READ_CHUNK_BYTES)
             if not chunk:
@@ -61,9 +62,11 @@ def save_upload_to_temp(upload: UploadFile, max_bytes: int = DEFAULT_MAX_BYTES) 
             temp.write(chunk)
         temp.flush()
     except Exception:
+        # Close before deleting to avoid Windows file locking issues.
         temp.close()
         Path(temp.name).unlink(missing_ok=True)
         raise
     else:
+        # Close handle so callers can safely read/unlink.
         temp.close()
         return Path(temp.name)
