@@ -1,12 +1,13 @@
 from pathlib import Path
 
 import re
+import tempfile
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
-from app.services import document_parser, file_store, qa_service, rewrite_service
+from app.services import document_parser, docx_writer, file_store, qa_service, rewrite_service
 
 app = FastAPI(title="legal-rewrite-qa")
 
@@ -39,6 +40,7 @@ async def ask_question(payload: QARequest):
 
 @app.post("/api/rewrite")
 async def rewrite_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     notes: str | None = Form(None),
     goals: str | None = Form(None),
@@ -56,7 +58,18 @@ async def rewrite_document(
             goals=parsed_goals,
             notes=notes,
         )
-        return {"rewritten_text": rewritten_text}
+        output_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+        output_path = Path(output_file.name)
+        output_file.close()
+        docx_writer.write_docx(rewritten_text, output_path)
+        background_tasks.add_task(output_path.unlink, missing_ok=True)
+        return FileResponse(
+            output_path,
+            media_type=(
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ),
+            filename="rewritten.docx",
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     finally:

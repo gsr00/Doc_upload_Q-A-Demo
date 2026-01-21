@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hatton James Legal · Drafting Tools</title>
+  <title>Newpage · AI System Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ink: #262262;
-      --rust: #c05530;
-      --sand: #f6f7fb;
+      --ink: #0b1322;
+      --teal: #09b3a4;
+      --amber: #f2c14e;
+      --sand: #f2f5f7;
       --card: #ffffff;
-      --shadow: 0 18px 38px rgba(13, 29, 73, 0.14);
+      --shadow: 0 18px 38px rgba(7, 16, 31, 0.18);
       --radius: 16px;
     }
     * {
@@ -22,12 +23,12 @@
     body {
       margin: 0;
       font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
-      background: radial-gradient(140% 140% at 20% 10%, rgba(38,34,98,0.1), transparent 45%), var(--sand);
-      color: #0f152c;
+      background: radial-gradient(140% 140% at 20% 10%, rgba(9,179,164,0.14), transparent 45%), var(--sand);
+      color: #0b1322;
     }
     header {
-      background: linear-gradient(120deg, var(--ink), #1d1a50 50%, #111033 100%);
-      color: #eef1ff;
+      background: linear-gradient(120deg, #0a0f1b, #0c1a2a 55%, #0a2330 100%);
+      color: #f5f8fb;
       padding: 28px 28px 36px;
       box-shadow: var(--shadow);
     }
@@ -85,7 +86,7 @@
       letter-spacing: 0.14em;
       font-weight: 700;
       font-size: 0.72rem;
-      color: var(--rust);
+      color: var(--teal);
       margin-bottom: 6px;
       display: inline-block;
     }
@@ -121,15 +122,15 @@
       gap: 10px;
       align-items: center;
       padding: 10px 12px;
-      border: 1px solid rgba(38,34,98,0.15);
+      border: 1px solid rgba(9, 179, 164, 0.3);
       border-radius: 12px;
-      background: #f9f7ff;
+      background: #eefaf8;
     }
     .goal input {
       width: 18px;
       height: 18px;
       margin: 0;
-      accent-color: var(--ink);
+      accent-color: var(--teal);
     }
     .actions {
       display: flex;
@@ -150,18 +151,18 @@
       transition: transform 120ms ease, box-shadow 160ms ease;
     }
     button.primary {
-      background: linear-gradient(135deg, var(--rust), #d87045);
-      color: #fff;
-      box-shadow: 0 10px 28px rgba(192, 85, 48, 0.35);
+      background: linear-gradient(135deg, var(--teal), #0f8f85);
+      color: #ffffff;
+      box-shadow: 0 10px 28px rgba(9, 179, 164, 0.35);
     }
     button.primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 14px 34px rgba(192, 85, 48, 0.4);
+      box-shadow: 0 14px 34px rgba(9, 179, 164, 0.45);
     }
     .ghost {
-      background: #f1f2f8;
-      color: #1b1f3f;
-      border: 1px dashed rgba(27,31,63,0.25);
+      background: #f2f7f6;
+      color: #0b1322;
+      border: 1px dashed rgba(9, 179, 164, 0.35);
     }
     .placeholder {
       margin-top: 12px;
@@ -182,10 +183,10 @@
       margin-top: 14px;
       padding: 14px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(38,34,98,0.08);
-      background: linear-gradient(135deg, #fbfbff, #f1f3ff);
-      color: #1c2142;
-      box-shadow: 0 6px 16px rgba(17, 25, 61, 0.08);
+      border: 1px solid rgba(9, 179, 164, 0.18);
+      background: linear-gradient(135deg, #f7fffd, #ecf9f7);
+      color: #0b1322;
+      box-shadow: 0 6px 16px rgba(7, 16, 31, 0.08);
     }
     .error {
       color: #b00020;
@@ -197,10 +198,10 @@
 <body>
   <header>
     <div class="brand">
-      <img src="https://www.hattonjameslegal.co.uk/wp-content/uploads/2020/01/logo.png" alt="Hatton James Legal logo">
+      <img src="https://newpage.io/wp-content/uploads/2020/01/logo.png" alt="Newpage logo">
       <div>
-        <div class="name">Hatton James Legal</div>
-        <div class="subhead">Drafting workspace – experimental</div>
+        <div class="name">newpage</div>
+        <div class="subhead">AI System – Demonstration</div>
       </div>
     </div>
   </header>
@@ -296,11 +297,33 @@
           method: 'POST',
           body: formData
         });
-        const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.detail || 'Request failed');
+          let detail = 'Request failed';
+          try {
+            const data = await res.json();
+            detail = data.detail || detail;
+          } catch (jsonErr) {
+            const text = await res.text();
+            if (text) detail = text;
+          }
+          throw new Error(detail);
         }
-        rewriteResult.textContent = data.rewritten_text || data.message || '';
+
+        const blob = await res.blob();
+        const disposition = res.headers.get('Content-Disposition') || '';
+        const match = /filename="?([^"]+)"?/i.exec(disposition);
+        const filename = match ? match[1] : 'rewritten.docx';
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        rewriteResult.textContent = 'Download started.';
         rewriteResult.hidden = false;
       } catch (err) {
         rewriteError.textContent = err.message || 'Something went wrong.';
