@@ -7,7 +7,7 @@ from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadF
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
-from app.services import document_parser, docx_writer, file_store, qa_service, rewrite_service
+from app.services import document_parser, doc_qa_service, docx_writer, file_store, qa_service, rewrite_service
 
 app = FastAPI(title="legal-rewrite-qa")
 
@@ -36,6 +36,19 @@ async def ask_question(payload: QARequest):
 
     answer = qa_service.answer_question(payload.question.strip())
     return {"answer": answer}
+
+
+@app.post("/api/doc_qa")
+async def doc_qa(payload: QARequest):
+    if not payload.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+    try:
+        result = doc_qa_service.answer_question(payload.question.strip())
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Doc Q&A failed: {exc}")
 
 
 @app.post("/api/rewrite")

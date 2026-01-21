@@ -62,6 +62,10 @@
       gap: 20px;
       grid-template-columns: 2fr 1.1fr;
     }
+    .stacked {
+      display: grid;
+      gap: 20px;
+    }
     @media (max-width: 960px) {
       .grid {
         grid-template-columns: 1fr;
@@ -208,23 +212,39 @@
 
   <main>
     <div class="grid">
-      <section class="card">
-        <div class="eyebrow">Section A · Rewrite document</div>
-        <h2>Turn this document into a stronger draft</h2>
 
-        <label for="doc-upload">Upload DOCX</label>
-        <input id="doc-upload" type="file" accept=".doc,.docx">
+      <div class="stacked">
+        <section class="card">
+          <div class="eyebrow">Section A ? Rewrite document</div>
+          <h2>Turn this document into a stronger draft</h2>
 
-        <label for="notes">Notes (optional)</label>
-        <textarea id="notes" placeholder="List must-keep clauses, deadlines, parties, or anything to emphasise."></textarea>
+          <label for="doc-upload">Upload DOCX</label>
+          <input id="doc-upload" type="file" accept=".doc,.docx">
 
-        <div class="actions">
-          <button class="primary" type="button" id="rewrite-btn">Run rewrite</button>
-          <button class="ghost" type="button" disabled aria-disabled="true">Download file </button>
-        </div>
-        <div id="rewrite-result" class="result-card" hidden></div>
-        <div id="rewrite-error" class="error" hidden></div>
-      </section>
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" placeholder="List must-keep clauses, deadlines, parties, or anything to emphasise."></textarea>
+
+          <div class="actions">
+            <button class="primary" type="button" id="rewrite-btn">Run rewrite</button>
+            <button class="ghost" type="button" disabled aria-disabled="true">Download file </button>
+          </div>
+          <div id="rewrite-result" class="result-card" hidden></div>
+          <div id="rewrite-error" class="error" hidden></div>
+        </section>
+
+        <section class="card">
+          <div class="eyebrow">Section C ? Document Q&A</div>
+          <h2>Ask a question grounded in documents</h2>
+          <label for="doc-question">Question</label>
+          <textarea id="doc-question" placeholder="e.g., What is the clause for holiday pay?"></textarea>
+          <div class="actions">
+            <button class="primary" type="button" id="doc-qa-btn">Find answer</button>
+          </div>
+          <div id="doc-qa-result" class="result-card" hidden></div>
+          <div id="doc-qa-sources" class="placeholder" hidden></div>
+          <div id="doc-qa-error" class="error" hidden></div>
+        </section>
+      </div>
 
       <section class="card">
         <div class="eyebrow">Section B · General Q&A</div>
@@ -247,6 +267,10 @@
     const rewriteBtn = document.getElementById('rewrite-btn');
     const rewriteResult = document.getElementById('rewrite-result');
     const rewriteError = document.getElementById('rewrite-error');
+    const docQaBtn = document.getElementById('doc-qa-btn');
+    const docQaResult = document.getElementById('doc-qa-result');
+    const docQaSources = document.getElementById('doc-qa-sources');
+    const docQaError = document.getElementById('doc-qa-error');
 
     qaBtn.addEventListener('click', async () => {
       qaError.hidden = true;
@@ -330,6 +354,62 @@
         rewriteError.hidden = false;
       }
     });
+    docQaBtn.addEventListener('click', async () => {
+      docQaError.hidden = true;
+      docQaResult.hidden = true;
+      docQaSources.hidden = true;
+
+      const question = document.getElementById('doc-question').value.trim();
+      if (!question) {
+        docQaError.textContent = 'Please enter a question.';
+        docQaError.hidden = false;
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/doc_qa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+
+        const raw = await res.text();
+        let data = null;
+        try {
+          data = JSON.parse(raw);
+        } catch (jsonErr) {
+          if (!res.ok) {
+            throw new Error(raw || 'Request failed');
+          }
+          throw new Error('Unexpected response format.');
+        }
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Request failed');
+        }
+
+        docQaResult.textContent = data.answer || '';
+        docQaResult.hidden = false;
+
+        if (Array.isArray(data.sources) && data.sources.length > 0) {
+          const lines = data.sources.slice(0, 2).map((source, idx) => {
+            const label = `SOURCE ${idx + 1}`;
+            const name = source.source || 'unknown';
+            const chunk = source.chunk_index ?? 'n/a';
+            const score = source.score ?? 0;
+            const excerpt = (source.excerpt || '').replace(/\s+/g, ' ').trim();
+            const shortExcerpt = excerpt.length > 240 ? `${excerpt.slice(0, 240)}...` : excerpt;
+            return `${label} | ${name} | chunk ${chunk} | score ${score}\n${shortExcerpt}`;
+          });
+          docQaSources.textContent = lines.join('\n\n');
+          docQaSources.hidden = false;
+        }
+      } catch (err) {
+        docQaError.textContent = err.message || 'Something went wrong.';
+        docQaError.hidden = false;
+      }
+    });
+
   </script>
 </body>
 </html>

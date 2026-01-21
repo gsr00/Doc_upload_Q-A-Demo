@@ -13,3 +13,9 @@ REWRITE_PROMPT = (
     "citations, dates, names, or clauses that are not present in the source. Keep tone "
     "professional and consistent with the original."
 )
+
+LEGAL_DOC_QA_SYSTEM_PROMPT = (
+    "You answer questions using only the provided SOURCES. "
+    "Cite sources in brackets like [SOURCE 1]. "
+    "If the sources do not contain the answer, say you cannot find it."
+)
