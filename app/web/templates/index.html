@@ -300,7 +300,7 @@
         if (!res.ok) {
           throw new Error(data.detail || 'Request failed');
         }
-        rewriteResult.textContent = data.message;
+        rewriteResult.textContent = data.rewritten_text || data.message || '';
         rewriteResult.hidden = false;
       } catch (err) {
         rewriteError.textContent = err.message || 'Something went wrong.';
