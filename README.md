@@ -1,7 +1,9 @@
 # Legal Rewrite & Document Q&A Application
 
 This repository contains a small but complete FastAPI application designed to demonstrate
-how AI can add value and increase productivity to applications. Applying AI technicques like RAG and using LLMs. Overall the AI system is explainable from retrieving data from documents to LLM augmentation.
+how AI can add value and increase productivity in real wprld applications.
+Applying AI technicques like Retrieval-Augmented Generation (RAG) and using Large Language Models.
+Overall the AI system is explainable from retrieving data from documents to LLM augmentation.
 
 The AI system Integrates three distinct core use cases embeded into one UI:
 
@@ -11,16 +13,14 @@ The AI system Integrates three distinct core use cases embeded into one UI:
 
 3. Searching across multiple uploaded documents to find relevant clauses or passages, with sources.
 
-
-
 ## Getting started
-Prerequisites:
+### Prerequisites:
 
 Python 3.10+
 A Pinecone account (free tier is sufficient)
 An OpenAI-compatible API key
 
-Setup
+### Setup
 1. Create and activate a virtual environment.
 2. Install dependencies:
 - pip install -r requirements.txt
@@ -29,8 +29,14 @@ Setup
 PINECONE_API_KEY=...
 PINECONE_INDEX_NAME=...
 
+4. Run the app
+uvicorn app.main:app --reload
 
+5. Open a browser at http://127.0.0.1:8000
 
+## How to run with Docker
+docker compose up --build
+open http://127.0.0.1:8000
 
 ## Endpoints
 - GET /health -> {"status": "ok"}
