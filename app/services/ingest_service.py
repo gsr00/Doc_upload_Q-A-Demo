@@ -10,7 +10,7 @@ from app.services import chunker, document_parser, embedding_service, vector_sto
 def ingest_docx(path: Path) -> dict[str, int | str]:
     raw_text = document_parser.extract_text_from_docx(path)
     normalized = chunker.normalize_text(raw_text)
-    chunks = chunker.chunk_text(normalized)
+    chunks = chunker.chunk_text(normalized, max_chars=200)
     if not chunks:
         raise ValueError("No content available for indexing.")
 

@@ -29,7 +29,7 @@ def _get_doc_root() -> Path:
     return Path(root)
 
 
-def _load_excerpt(doc_root: Path, filename: str, chunk_index: int, max_chars: int = 800) -> str:
+def _load_excerpt(doc_root: Path, filename: str, chunk_index: int, max_chars: int = 200) -> str:
     path = doc_root / filename
     if not path.exists():
         raise ValueError(f"Source document not found: {path}")
