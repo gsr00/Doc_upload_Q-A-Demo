@@ -44,3 +44,5 @@ open http://127.0.0.1:8000
 
 ## Smoke test
 Run `python tests/manual_smoke.py` while the server is running to hit the root and health endpoints.
+
+# This repository is shared for interview evaluation purposes.
