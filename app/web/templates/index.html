@@ -267,6 +267,7 @@
     const rewriteBtn = document.getElementById('rewrite-btn');
     const rewriteResult = document.getElementById('rewrite-result');
     const rewriteError = document.getElementById('rewrite-error');
+    const rewriteFileInput = document.getElementById('doc-upload');
     const docQaBtn = document.getElementById('doc-qa-btn');
     const docQaResult = document.getElementById('doc-qa-result');
     const docQaSources = document.getElementById('doc-qa-sources');
@@ -305,18 +306,17 @@
       rewriteError.hidden = true;
       rewriteResult.hidden = true;
 
-      const fileInput = document.getElementById('doc-upload');
-      if (!fileInput.files || fileInput.files.length === 0) {
+      if (!rewriteFileInput.files || rewriteFileInput.files.length === 0) {
         rewriteError.textContent = 'Please choose a DOCX file.';
         rewriteError.hidden = false;
         return;
       }
 
-      const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
-      formData.append('notes', document.getElementById('notes').value || '');
-
       try {
+        const formData = new FormData();
+        formData.append('file', rewriteFileInput.files[0]);
+        formData.append('notes', document.getElementById('notes').value || '');
+
         const res = await fetch('/api/rewrite', {
           method: 'POST',
           body: formData
@@ -345,7 +345,9 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        // Delay revocation to avoid aborting the download in some browsers.
+        // Give the browser ample time to finish the download before revoking.
+        setTimeout(() => window.URL.revokeObjectURL(url), 5000);
 
         rewriteResult.textContent = 'Download started.';
         rewriteResult.hidden = false;
@@ -413,4 +415,3 @@
   </script>
 </body>
 </html>
-

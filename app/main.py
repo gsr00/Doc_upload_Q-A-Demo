@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Optional
 
 import re
 import tempfile
@@ -9,8 +12,15 @@ from pydantic import BaseModel, Field
 
 from app.services import document_parser, doc_qa_service, docx_writer, file_store, qa_service, rewrite_service
 
-app = FastAPI(title="legal-rewrite-qa")
+from uuid import uuid4
 
+app = FastAPI(title="legal-rewrite-qa")
+app_state = {"mode": "normal"}
+
+@app.post("/api/mode/{new_mode}")
+async def set_mode(new_mode: str):
+    app_state["mode"] = new_mode
+    return {"mode": app_state["mode"]}
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -24,12 +34,22 @@ async def health():
     return {"status": "ok"}
 
 
+@app.post("/api/document")
+async def create_document():
+    document_id = str(uuid4())
+    return {"document_id": document_id, "status": "ok"}
+
+
 class QARequest(BaseModel):
     question: str = Field(..., min_length=5, max_length=2000)
 
 
 @app.post("/api/qa")
 async def ask_question(payload: QARequest):
+    if app_state["mode"] == "maintenance":
+        raise HTTPException(status_code=503, detail="System in maintenance mode.")
+
+
     # Validate and forward to the QA service (LLM stubbed in llm_gateway for now).
     if not payload.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
@@ -55,19 +75,21 @@ async def doc_qa(payload: QARequest):
 async def rewrite_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    notes: str | None = Form(None),
-    goals: str | None = Form(None),
+    notes: Optional[str] = Form(None),
+    goals: Optional[str] = Form(None),
 ):
     # Accept only DOCX, with size/type validation and temp cleanup.
-    tmp_path: Path | None = None
+    tmp_path: Optional[Path] = None
     try:
         tmp_path = file_store.save_upload_to_temp(file)
         extracted_text = document_parser.extract_text_from_docx(tmp_path)
         if not extracted_text.strip():
             raise HTTPException(status_code=400, detail="No text found in the document.")
+        document_id = "demo-doc-1"
         parsed_goals = [part for part in re.split(r"[,\n]", goals or "") if part.strip()]
         rewritten_text = rewrite_service.rewrite_document(
-            extracted_text,
+            document_id=document_id,
+            text=extracted_text,
             goals=parsed_goals,
             notes=notes,
         )

@@ -1,11 +1,18 @@
 """Rewrite service built on top of the LLM gateway."""
 from __future__ import annotations
 
+import time
+
 from app import prompts
 from app.services.llm_gateway import generate_text
+from app.services.services import lock_service
 
 GOALS_MAX_CHARS = 500
 NOTES_MAX_CHARS = 1000
+LOCK_TTL_SECONDS = 60
+REWRITE_IN_PROGRESS_MESSAGE = (
+    "A rewrite is already running for this document. Please wait and try again."
+)
 
 
 def _clean_goals(goals: list[str] | None) -> list[str]:
@@ -38,11 +45,31 @@ def _build_user_prompt(text: str, goals: list[str], notes: str | None) -> str:
     return "\n".join(parts)
 
 
-def rewrite_document(text: str, goals: list[str] | None = None, notes: str | None = None) -> str:
-    if not text or not text.strip():
-        raise ValueError("Document text is empty.")
-    cleaned_goals = _clean_goals(goals)
-    cleaned_notes = _validate_notes(notes)
-    prompt = _build_user_prompt(text, cleaned_goals, cleaned_notes)
-    llm_response = generate_text(prompt, system=prompts.REWRITE_PROMPT)
-    return llm_response.content
+def rewrite_document(
+    document_id: str,
+    text: str,
+    goals: list[str] | None = None,
+    notes: str | None = None,
+) -> str:
+    cleaned_document_id = document_id.strip() if document_id else ""
+    if not cleaned_document_id:
+        raise ValueError("Document ID is required.")
+
+    lock_key = f"rewrite:{cleaned_document_id}"
+    if not lock_service.acquire(lock_key, ttl_seconds=LOCK_TTL_SECONDS):
+        raise ValueError(REWRITE_IN_PROGRESS_MESSAGE)
+
+    try:
+        time.sleep(10)
+
+        if not text or not text.strip():
+            raise ValueError("Document text is empty.")
+
+        cleaned_goals = _clean_goals(goals)
+        cleaned_notes = _validate_notes(notes)
+        prompt = _build_user_prompt(text, cleaned_goals, cleaned_notes)
+
+        llm_response = generate_text(prompt, system=prompts.REWRITE_PROMPT)
+        return llm_response.content
+    finally:
+        lock_service.release(lock_key)
